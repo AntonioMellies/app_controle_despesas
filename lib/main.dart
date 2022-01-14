@@ -42,13 +42,26 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _showChart = false;
   final List<Transaction> _transactions = [
     // Transaction(
     //   id: 't1',
     //   title: 'Conta 1',
     //   value: 300.00,
     //   date: DateTime.now(),
-    // )
+    // ),
+    // Transaction(
+    //   id: 't1',
+    //   title: 'Conta 1',
+    //   value: 300.00,
+    //   date: DateTime.now(),
+    // ),
+    // Transaction(
+    //   id: 't1',
+    //   title: 'Conta 1',
+    //   value: 300.00,
+    //   date: DateTime.now(),
+    // ),
   ];
 
   List<Transaction> get _recentTransacrions {
@@ -88,22 +101,46 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Despesas Pessoais'),
-        actions: <Widget>[
+    final _mediaQuery = MediaQuery.of(context);
+    bool _isLandscape = _mediaQuery.orientation == Orientation.landscape;
+    final appBar = AppBar(
+      title: const Text('Despesas Pessoais'),
+      actions: <Widget>[
+        if (_isLandscape)
           IconButton(
-            onPressed: () => _openTransactionFormModal(context),
-            icon: const Icon(Icons.add),
-          )
-        ],
-      ),
+            icon: Icon(_showChart ? Icons.list : Icons.show_chart),
+            onPressed: () {
+              setState(() {
+                _showChart = !_showChart;
+              });
+            },
+          ),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => _openTransactionFormModal(context),
+        ),
+      ],
+    );
+    final availableHeight = _mediaQuery.size.height -
+        appBar.preferredSize.height -
+        MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Chart(_recentTransacrions),
-            TransactionList(_transactions, _removeTransaction),
+            if (_showChart || !_isLandscape)
+              SizedBox(
+                height: availableHeight * (_isLandscape ? 0.7 : 0.3),
+                child: Chart(_recentTransacrions),
+              ),
+            if (!_showChart || !_isLandscape)
+              SizedBox(
+                height: availableHeight * 0.7,
+                child: TransactionList(_transactions, _removeTransaction),
+              ),
           ],
         ),
       ),
